@@ -7,20 +7,33 @@ from plotly.subplots import make_subplots
 # Konfigurasi Halaman
 st.set_page_config(page_title="PBL 5 - Estimasi Stok Ikan", layout="wide")
 
-# CSS untuk desain profesional
+# CSS untuk desain yang adaptif
+# PERBAIKAN: Menggunakan unsafe_allow_html=True
 st.markdown("""
     <style>
-    .main-header {background: linear-gradient(90deg, #004a99 0%, #0077b6 100%); padding: 25px; border-radius: 10px; color: white; margin-bottom: 20px;}
-    .info-box {background-color: rgba(0, 74, 153, 0.05); padding: 15px; border-radius: 10px; border-left: 5px solid #004a99;}
+    .main-header {
+        background: linear-gradient(90deg, #004a99 0%, #0077b6 100%); 
+        padding: 25px; 
+        border-radius: 10px; 
+        color: white; 
+        margin-bottom: 20px;
+    }
+    .info-box {
+        background-color: var(--secondary-background-color); 
+        padding: 15px; 
+        border-radius: 10px; 
+        border-left: 5px solid #004a99;
+    }
     </style>
-""", unsafe_html=True)
+""", unsafe_allow_html=True)
 
 # Header
 with st.container():
+    # PERBAIKAN: Menggunakan unsafe_allow_html=True
     st.markdown("""<div class="main-header">
         <h1 style="text-align: center;">Estimasi Stok Ikan Laut Jawa</h1>
         <h3 style="text-align: center;">PBL 5 — Ekonomi Sumber Daya Ikan</h3>
-    </div>""", unsafe_html=True)
+    </div>""", unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     with col1:
@@ -30,14 +43,18 @@ with st.container():
         st.write("• **Nabil Athala Naufal** (10090224022)")
     with col2:
         st.markdown("### 🎓 Informasi Akademik")
+        # PERBAIKAN: Menambahkan unsafe_allow_html=True agar info-box tampil
         st.markdown('<div class="info-box"><b>Mata Kuliah:</b> Ekonomi Sumber Daya Alam dan Lingkungan<br>'
-                    '<b>Dosen Pengampu:</b> YUHKA SUNDAYA, S.E., M.Si.</div>', unsafe_html=True)
+                    '<b>Dosen Pengampu:</b> YUHKA SUNDAYA, S.E., M.Si.</div>', unsafe_allow_html=True)
 
 st.markdown("---")
 
 # Sidebar
-# Menambahkan logo kampus
-st.sidebar.image("Logo Unisbaa.png", width=200)
+try:
+    st.sidebar.image("Logo Unisbaa.png", use_container_width=True)
+except:
+    st.sidebar.warning("Logo tidak ditemukan, pastikan nama file sesuai.")
+
 st.sidebar.header("⚙️ Konfigurasi Model")
 suhu = st.sidebar.slider("Suhu Laut (°C)", 25.0, 32.0, 29.5)
 klorofil = st.sidebar.slider("Klorofil-a (mg/m³)", 0.1, 1.0, 0.37)
@@ -73,20 +90,18 @@ col1, col2 = st.columns([1, 1])
 
 with col1:
     fig = make_subplots(specs=[[{"secondary_y": True}]])
-    fig.add_trace(go.Scatter(x=data["Bulan"], y=data["Suhu"], name="Suhu (°C)", line=dict(color='#EF553B')), secondary_y=False)
-    fig.add_trace(go.Scatter(x=data["Bulan"], y=data["Klorofil"], name="Klorofil", line=dict(color='#00CC96')), secondary_y=True)
-    fig.update_layout(template="plotly") 
-    # Perbaikan: Mengganti use_container_width dengan width='100%' sesuai aturan terbaru
-    st.plotly_chart(fig, width='100%')
+    fig.add_trace(go.Scatter(x=data["Bulan"], y=data["Suhu"], name="Suhu (°C)"), secondary_y=False)
+    fig.add_trace(go.Scatter(x=data["Bulan"], y=data["Klorofil"], name="Klorofil"), secondary_y=True)
+    fig.update_layout(template="plotly", margin=dict(l=20, r=20, t=30, b=20))
+    st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    fig2 = go.Figure(go.Bar(x=data["Bulan"], y=data["Estimasi Stok (Ton)"], marker_color='#636EFA'))
-    fig2.update_layout(template="plotly")
-    st.plotly_chart(fig2, width='100%')
+    fig2 = go.Figure(go.Bar(x=data["Bulan"], y=data["Estimasi Stok (Ton)"]))
+    fig2.update_layout(template="plotly", margin=dict(l=20, r=20, t=30, b=20))
+    st.plotly_chart(fig2, use_container_width=True)
 
 st.subheader("📋 Data Satelit vs Estimasi Stok Ikan")
-# Perbaikan: Menggunakan st.dataframe dengan argumen width yang tepat
-st.dataframe(data.style.format({"Estimasi Stok (Ton)": "{:,.0f}"}), width=1000)
+st.dataframe(data.style.format({"Estimasi Stok (Ton)": "{:,.0f}"}), use_container_width=True)
 
 st.markdown("---")
 
@@ -98,9 +113,9 @@ TR = (p * Y * 1000) / 1e9
 TC = (c * E) / 1000
 
 fig_bio = go.Figure()
-fig_bio.add_trace(go.Scatter(x=E, y=TR, name="Total Revenue", line=dict(width=4, color='#AB63FA')))
-fig_bio.add_trace(go.Scatter(x=E, y=TC, name="Total Cost", line=dict(width=4, dash='dash', color='#FFA15A')))
+fig_bio.add_trace(go.Scatter(x=E, y=TR, name="Total Revenue", line=dict(width=4)))
+fig_bio.add_trace(go.Scatter(x=E, y=TC, name="Total Cost", line=dict(width=4, dash='dash')))
 fig_bio.update_layout(xaxis_title="Upaya (Trip)", yaxis_title="Nilai (Miliar Rp)", template="plotly")
-st.plotly_chart(fig_bio, width='100%')
+st.plotly_chart(fig_bio, use_container_width=True)
 
 st.info(f"Estimasi Stok Ikan Laut Jawa: {int(K_aktual):,} Ton.")
