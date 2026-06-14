@@ -1,0 +1,15 @@
+﻿Simulasi Output GEE (Google Earth Engine) - Laut Jawa;;;
+;;;
+Bulan;Suhu (°C);Klorofil-a (mg/m³);Keterangan Musim
+Jan;28.5;0.85;Musim Barat (Nutrisi Tinggi)
+Feb;28.4;0.78;Musim Barat (Nutrisi Tinggi)
+Mar;28.8;0.55;Transisi
+Apr;29.5;0.35;Musim Peralihan
+Mei;29.8;0.22;Musim Timur (Klorofil Rendah)
+Jun;29.9;0.18;Musim Timur (Klorofil Rendah)
+Jul;29.7;0.20;Musim Timur (Klorofil Rendah)
+Agu;29.4;0.25;Musim Timur (Peningkatan)
+Sep;29.2;0.38;Transisi
+Okt;28.9;0.52;Transisi
+Nov;28.7;0.65;Awal Musim Barat
+Des;28.6;0.80;Musim Barat
