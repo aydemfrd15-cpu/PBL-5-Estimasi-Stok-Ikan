@@ -33,9 +33,16 @@ st.markdown("---")
 # 4. Fungsi Data (DIPERBAIKI)
 @st.cache_data(ttl=60)
 def load_data():
-    # Path file yang tepat
-    file_path = os.path.join("DATA", "Estimasi Stok Ikan Laut Jawa")
+    # Gunakan path yang lebih aman
+    file_path = "DATA/Estimasi Stok Ikan Laut Jawa"
     
+    # Debugging: Cek apakah file benar-benar ada di lokasi tersebut
+    if not os.path.exists(file_path):
+        # Jika tidak ditemukan, coba cari file lain di folder DATA
+        files_in_data = os.listdir("DATA")
+        st.error(f"File tidak ditemukan di {file_path}. File yang tersedia di folder DATA: {files_in_data}")
+        return pd.DataFrame()
+        
     # Membaca data dengan pemisah spasi dan koma sebagai desimal
     df = pd.read_csv(file_path, sep='\s+', decimal=',')
     
