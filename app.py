@@ -24,19 +24,39 @@ st.markdown("""
         border-left: 5px solid #0077b6; 
         color: var(--text-color); 
     }
+    .param-box {
+        background-color: var(--secondary-background-color);
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid #0077b6;
+    }
     </style>
 """, unsafe_allow_html=True)
 
 # --- SIDEBAR ---
 with st.sidebar:
-    st.header("📥 Import Data GEE (CSV)")
-    uploaded_file = st.file_uploader("Unggah data hasil GEE", type=["csv"])
+    st.header("📥 Data Input")
+    uploaded_file = st.file_uploader("Unggah data GEE (.csv)", type=["csv"])
     
     st.markdown("---")
-    st.header("⚙️ Parameter Model Estimasi")
-    suhu_optimal = st.slider("Suhu Optimal Ikan (°C)", 20.0, 35.0, 28.50)
-    faktor_klorofil = st.slider("Faktor Pengali Klorofil (α)", 1000, 5000, 3000)
-    faktor_penalti = st.slider("Faktor Penalti Suhu (β)", 100, 1000, 500)
+    st.header("⚙️ Parameter Analisis")
+    
+    # Grid Parameter
+    col_p1, col_p2 = st.columns(2)
+    with col_p1:
+        st.markdown('<div class="param-box"><b>Suhu Opt.</b><br>28.5 °C</div>', unsafe_allow_html=True)
+    with col_p2:
+        st.markdown('<div class="param-box"><b>Klorofil α</b><br>3000</div>', unsafe_allow_html=True)
+    
+    st.write("") # Spasi
+    st.markdown('<div class="param-box"><b>Faktor Penalti Suhu (β):</b> 500</div>', unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.subheader("Pengaturan Model")
+    suhu_optimal = st.slider("Suhu Optimal (°C)", 20.0, 35.0, 28.50)
+    faktor_klorofil = st.slider("Faktor Klorofil (α)", 1000, 5000, 3000)
+    faktor_penalti = st.slider("Faktor Penalti (β)", 100, 1000, 500)
 
 # --- MAIN CONTENT ---
 with st.container():
@@ -88,7 +108,6 @@ if not df.empty:
         st.subheader("📈 Estimasi Stok")
         st.metric("Stok Puncak (Ton)", f"{df['Estimasi_Stok'].max():,.0f}")
         fig2 = go.Figure(go.Bar(x=df["Bulan"], y=df["Estimasi_Stok"], marker_color="#0077b6"))
-        # FIX: l=60 (Margin kiri ditingkatkan agar angka sumbu Y tidak terpotong)
         fig2.update_layout(template=None, height=300, margin=dict(l=60, r=20, t=20, b=80)) 
         st.plotly_chart(fig2, use_container_width=True)
 
