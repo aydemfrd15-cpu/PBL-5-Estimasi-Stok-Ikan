@@ -39,23 +39,23 @@ with st.container():
 
 st.markdown("---")
 
-# Fungsi Data dengan perbaikan index
+# Fungsi Data yang diperbaiki (Tanpa index_col=0 untuk menghindari error)
 @st.cache_data(ttl=10)
 def get_data():
-    # index_col=0 digunakan untuk mengabaikan kolom angka (0,1,2,3...) yang tidak perlu
-    df = pd.read_csv("2026-06-16T05-00_export.csv", index_col=0)
+    df = pd.read_csv("2026-06-16T05-00_export.csv")
+    # Hapus kolom pertama jika berisi angka 0-11
+    if df.columns[0] == 'Unnamed: 0' or df.iloc[:, 0].dtype in ['int64', 'int32']:
+        df = df.drop(df.columns[0], axis=1)
+        
     df.columns = df.columns.str.strip()
     
-    # Pastikan urutan benar
+    # Urutan bulan
     order = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"]
     df['Bulan'] = pd.Categorical(df['Bulan'], categories=order, ordered=True)
     return df.sort_values('Bulan')
 
 # Load Data
 data = get_data()
-
-# Debugging (bisa dihapus nanti)
-# st.write(f"Data terbaca: {len(data)} baris") 
 
 # Dashboard Grafik
 st.subheader("📊 Analisis Oseanografi & Prediksi Biomassa")
