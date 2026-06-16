@@ -26,7 +26,6 @@ with st.container():
         st.markdown("<h3 style='color: white; margin: 0;'>PBL 5 — Ekonomi Sumber Daya Ikan</h3>", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Kelompok & Info Akademik
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("### 👥 Kelompok 4")
@@ -40,17 +39,23 @@ with st.container():
 
 st.markdown("---")
 
-# Fungsi Data
-@st.cache_data(ttl=10) # TTL singkat agar data selalu fresh
+# Fungsi Data dengan perbaikan index
+@st.cache_data(ttl=10)
 def get_data():
-    df = pd.read_csv("2026-06-16T05-00_export.csv")
+    # index_col=0 digunakan untuk mengabaikan kolom angka (0,1,2,3...) yang tidak perlu
+    df = pd.read_csv("2026-06-16T05-00_export.csv", index_col=0)
     df.columns = df.columns.str.strip()
-    # Pastikan data diurutkan berdasarkan kalender
+    
+    # Pastikan urutan benar
     order = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"]
     df['Bulan'] = pd.Categorical(df['Bulan'], categories=order, ordered=True)
     return df.sort_values('Bulan')
 
+# Load Data
 data = get_data()
+
+# Debugging (bisa dihapus nanti)
+# st.write(f"Data terbaca: {len(data)} baris") 
 
 # Dashboard Grafik
 st.subheader("📊 Analisis Oseanografi & Prediksi Biomassa")
