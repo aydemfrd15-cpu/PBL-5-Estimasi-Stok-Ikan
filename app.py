@@ -52,7 +52,7 @@ with st.container():
 
     col_kiri, col_kanan = st.columns([1, 1])
     with col_kiri:
-        st.markdown("### 👥 Tim Peneliti")
+        st.markdown("### 👥 Kelompok 4")
         st.write("• **Salsa Zahratul Aulia** (10090224004)")
         st.write("• **Aida Farida Kultsum** (10090224014)")
         st.write("• **Nabil Athala Naufal** (10090224022)")
