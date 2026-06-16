@@ -7,7 +7,7 @@ import os
 # Konfigurasi Halaman
 st.set_page_config(page_title="Estimasi Stok Ikan Laut Jawa", layout="wide", page_icon="🐟")
 
-# CSS Dinamis: Menggunakan variabel warna tema Streamlit agar support Mode Gelap/Terang
+# CSS Dinamis
 st.markdown("""
     <style>
     .main-header { 
@@ -27,7 +27,21 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Header Informatif
+# --- SIDEBAR ---
+with st.sidebar:
+    st.header("📥 Import Data GEE (CSV)")
+    uploaded_file = st.file_uploader("Unggah data hasil GEE", type=["csv"])
+    st.write("200MB per file • CSV")
+    
+    st.markdown("---")
+    st.header("⚙️ Parameter Model Estimasi")
+    st.write("Sesuaikan sensitivitas ikan terhadap lingkungan:")
+    
+    suhu_optimal = st.slider("Suhu Optimal Ikan (°C)", 20.0, 35.0, 28.50)
+    faktor_klorofil = st.slider("Faktor Pengali Klorofil (α)", 1000, 5000, 3000)
+    faktor_penalti = st.slider("Faktor Penalti Suhu (β)", 100, 1000, 500)
+
+# --- MAIN CONTENT ---
 with st.container():
     col_logo, col_text = st.columns([1, 6])
     with col_logo:
@@ -51,6 +65,9 @@ st.markdown("---")
 @st.cache_data(ttl=60)
 def load_data():
     file_path = os.path.join("DATA", "Estimasi Stok Ikan Laut Jawa")
+    # Jika file upload ada, gunakan itu, jika tidak gunakan local
+    if uploaded_file is not None:
+        return pd.read_csv(uploaded_file)
     df = pd.read_csv(file_path, sep='\s+', decimal=',')
     order = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"]
     df['Bulan'] = pd.Categorical(df['Bulan'], categories=order, ordered=True)
@@ -65,7 +82,6 @@ try:
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.add_trace(go.Scatter(x=df["Bulan"], y=df["Suhu_Laut_C"], name="Suhu (°C)", line=dict(color="#FF4136", width=3)), secondary_y=False)
         fig.add_trace(go.Scatter(x=df["Bulan"], y=df["Klorofil_a"], name="Klorofil", line=dict(color="#2ECC40", width=3, dash="dot")), secondary_y=True)
-        # Template diubah menjadi None agar mengikuti tema Streamlit (Gelap/Terang)
         fig.update_layout(template=None, height=400, margin=dict(l=20, r=20, t=30, b=20), legend=dict(orientation="h"))
         st.plotly_chart(fig, use_container_width=True)
 
@@ -80,4 +96,4 @@ try:
         st.dataframe(df, use_container_width=True)
 
 except Exception as e:
-    st.error(f"Error: {e}. Pastikan file 'Estimasi Stok Ikan Laut Jawa' ada di folder 'DATA'.")
+    st.info("Silakan unggah file data di sidebar untuk memulai analisis.")
