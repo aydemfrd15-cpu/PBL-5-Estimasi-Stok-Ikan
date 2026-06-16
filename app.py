@@ -42,31 +42,18 @@ with st.sidebar:
     st.markdown("---")
     st.header("⚙️ Parameter Analisis")
     
-    # Pengaturan Model
+    # Pengaturan Model dengan Slider
     suhu_optimal = st.slider("Suhu Optimal (°C)", 20.0, 35.0, 28.50)
     faktor_klorofil = st.slider("Faktor Klorofil (α)", 1000, 5000, 3000)
     faktor_penalti = st.slider("Faktor Penalti (β)", 100, 1000, 500)
     
-    st.markdown("---")
-    st.markdown(f"""
-    <div class="param-box">
-        <b>Status Simulasi:</b><br>Aktif
-    </div>
-    """, unsafe_allow_html=True)
-
-# --- FUNGSI DATA ---
-def get_data(file_obj):
-    if file_obj is not None:
-        return pd.read_csv(file_obj)
-    file_path = os.path.join("DATA", "Estimasi Stok Ikan Laut Jawa")
-    if os.path.exists(file_path):
-        df = pd.read_csv(file_path, sep='\s+', decimal=',')
-        order = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"]
-        df['Bulan'] = pd.Categorical(df['Bulan'], categories=order, ordered=True)
-        return df.sort_values('Bulan')
-    return pd.DataFrame()
-
-df = get_data(uploaded_file)
+    # Grid Parameter Live
+    st.write("")
+    col_p1, col_p2 = st.columns(2)
+    with col_p1:
+        st.markdown(f'<div class="param-box"><b>Suhu Opt.</b><br>{suhu_optimal} °C</div>', unsafe_allow_html=True)
+    with col_p2:
+        st.markdown(f'<div class="param-box"><b>Klorofil α</b><br>{faktor_klorofil}</div>', unsafe_allow_html=True)
 
 # --- MAIN CONTENT ---
 with st.container():
@@ -89,11 +76,25 @@ with st.container():
 
 st.markdown("---")
 
+def get_data(file_obj):
+    if file_obj is not None:
+        # Membaca file CSV yang diunggah
+        df = pd.read_csv(file_obj)
+        # Menyesuaikan nama kolom sesuai dengan file yang Anda unggah
+        # Asumsi: kolom suhu adalah 'C' dan klorofil adalah 'Clorophyll'
+        df = df.rename(columns={'C': 'Suhu_Laut_C', 'Clorophyll': 'Klorofil_a'})
+        # Membuat label bulan dummy jika belum ada
+        df['Bulan'] = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"]
+        return df
+    return pd.DataFrame()
+
+df = get_data(uploaded_file)
+
 if not df.empty:
     # LOGIKA PERHITUNGAN DINAMIS
-    # Rumus asumsi: (Klorofil * α) - (Selisih Suhu * β)
+    # Stok = (Klorofil * α) - (Selisih Suhu * β)
     selisih_suhu = abs(df["Suhu_Laut_C"] - suhu_optimal)
-    df["Estimasi_Stok_Dinamis"] = (df["Klorofil_a"] * faktor_klorofil) - (selisih_suhu * faktor_penalti)
+    df["Estimasi_Stok"] = (df["Klorofil_a"] * faktor_klorofil) - (selisih_suhu * faktor_penalti)
     
     col1, col2 = st.columns([2.5, 1.5]) 
 
@@ -106,13 +107,13 @@ if not df.empty:
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        st.subheader("📈 Estimasi Stok (Simulasi)")
-        st.metric("Stok Puncak", f"{df['Estimasi_Stok_Dinamis'].max():,.0f} Ton")
-        fig2 = go.Figure(go.Bar(x=df["Bulan"], y=df["Estimasi_Stok_Dinamis"], marker_color="#0077b6"))
+        st.subheader("📈 Estimasi Stok")
+        st.metric("Stok Puncak", f"{df['Estimasi_Stok'].max():,.0f} Ton")
+        fig2 = go.Figure(go.Bar(x=df["Bulan"], y=df["Estimasi_Stok"], marker_color="#0077b6"))
         fig2.update_layout(template=None, height=300, margin=dict(l=60, r=20, t=20, b=80)) 
         st.plotly_chart(fig2, use_container_width=True)
 
     with st.expander("📋 Lihat Detail Data Mentah"):
         st.dataframe(df, use_container_width=True)
 else:
-    st.info("Data belum dimuat. Silakan unggah file CSV di sidebar atau pastikan file ada di folder DATA.")
+    st.info("Silakan unggah file CSV 'SST and Clorophyll' untuk memulai analisis.")
