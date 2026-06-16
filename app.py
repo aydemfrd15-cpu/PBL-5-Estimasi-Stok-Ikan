@@ -4,7 +4,6 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import os
 
-# Konfigurasi Halaman
 st.set_page_config(page_title="PBL 5 - Estimasi Stok Ikan", layout="wide")
 
 # CSS
@@ -25,38 +24,29 @@ with st.container():
         st.markdown("<h1 style='color: white; margin: 0;'>Estimasi Stok Ikan Laut Jawa</h1>", unsafe_allow_html=True)
         st.markdown("<h3 style='color: white; margin: 0;'>PBL 5 — Ekonomi Sumber Daya Ikan</h3>", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("### 👥 Kelompok 4")
-        st.write("• **Salsa Zahratul Aulia** (10090224004)")
-        st.write("• **Aida Farida Kultsum** (10090224014)")
-        st.write("• **Nabil Athala Naufal** (10090224022)")
-    with col2:
-        st.markdown("### 🎓 Informasi Akademik")
-        st.markdown('<div class="info-box"><b>Mata Kuliah:</b> Ekonomi Sumber Daya Alam dan Lingkungan<br>'
-                    '<b>Dosen Pengampu:</b> YUHKA SUNDAYA, S.E., M.Si.</div>', unsafe_allow_html=True)
 
-st.markdown("---")
-
-# Fungsi Data yang sudah diperbaiki
+# Fungsi Data yang Sangat Aman
 @st.cache_data(ttl=10)
 def get_data():
-    # Gunakan usecols untuk hanya mengambil kolom yang relevan
-    # Ini akan mengabaikan kolom '0' atau 'Unnamed' yang menyebabkan error
-    df = pd.read_csv("2026-06-16T05-00_export.csv", 
-                     usecols=["Bulan", "Suhu_Laut_C", "Klorofil_a", "Estimasi_Stok"])
+    # Membaca semua data tanpa batasan kolom
+    df = pd.read_csv("2026-06-16T05-00_export.csv")
     
-    # Pastikan data diurutkan berdasarkan kalender
+    # Menghapus kolom yang tidak bernama (biasanya kolom indeks sampah)
+    df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+    
+    # Memastikan kolom yang dibutuhkan ada
+    required = ["Bulan", "Suhu_Laut_C", "Klorofil_a", "Estimasi_Stok"]
+    df = df[required]
+    
+    # Urutan bulan
     order = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"]
     df['Bulan'] = pd.Categorical(df['Bulan'], categories=order, ordered=True)
     return df.sort_values('Bulan')
 
-# Load Data
 try:
     data = get_data()
 
-    # Dashboard Grafik
+    # Dashboard
     st.subheader("📊 Analisis Oseanografi & Prediksi Biomassa")
     col1, col2 = st.columns(2)
 
@@ -73,9 +63,8 @@ try:
         fig2.update_layout(template="plotly_dark", height=400)
         st.plotly_chart(fig2, use_container_width=True)
 
-    # Tabel Data
     st.subheader("📋 Detail Data Mentah")
     st.dataframe(data, use_container_width=True)
 
 except Exception as e:
-    st.error(f"Terjadi kesalahan saat memuat data: {e}. Pastikan file CSV memiliki kolom: Bulan, Suhu_Laut_C, Klorofil_a, Estimasi_Stok.")
+    st.error(f"Error: {e}. Pastikan file CSV di GitHub memiliki kolom: Bulan, Suhu_Laut_C, Klorofil_a, Estimasi_Stok.")
