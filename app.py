@@ -31,12 +31,9 @@ st.markdown("""
 with st.sidebar:
     st.header("📥 Import Data GEE (CSV)")
     uploaded_file = st.file_uploader("Unggah data hasil GEE", type=["csv"])
-    st.write("200MB per file • CSV")
     
     st.markdown("---")
     st.header("⚙️ Parameter Model Estimasi")
-    st.write("Sesuaikan sensitivitas ikan terhadap lingkungan:")
-    
     suhu_optimal = st.slider("Suhu Optimal Ikan (°C)", 20.0, 35.0, 28.50)
     faktor_klorofil = st.slider("Faktor Pengali Klorofil (α)", 1000, 5000, 3000)
     faktor_penalti = st.slider("Faktor Penalti Suhu (β)", 100, 1000, 500)
@@ -52,7 +49,7 @@ with st.container():
 
     col_kiri, col_kanan = st.columns([1, 1])
     with col_kiri:
-        st.markdown("### 👥 Kelompok 4")
+        st.markdown("### 👥 Tim Peneliti")
         st.write("• **Salsa Zahratul Aulia** (10090224004)")
         st.write("• **Aida Farida Kultsum** (10090224014)")
         st.write("• **Nabil Athala Naufal** (10090224022)")
@@ -64,36 +61,43 @@ st.markdown("---")
 
 @st.cache_data(ttl=60)
 def load_data():
-    file_path = os.path.join("DATA", "Estimasi Stok Ikan Laut Jawa")
-    # Jika file upload ada, gunakan itu, jika tidak gunakan local
+    # Menggunakan file upload jika tersedia, jika tidak maka default ke folder DATA
     if uploaded_file is not None:
         return pd.read_csv(uploaded_file)
-    df = pd.read_csv(file_path, sep='\s+', decimal=',')
-    order = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"]
-    df['Bulan'] = pd.Categorical(df['Bulan'], categories=order, ordered=True)
-    return df.sort_values('Bulan')
+    
+    file_path = os.path.join("DATA", "Estimasi Stok Ikan Laut Jawa")
+    if os.path.exists(file_path):
+        df = pd.read_csv(file_path, sep='\s+', decimal=',')
+        order = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"]
+        df['Bulan'] = pd.Categorical(df['Bulan'], categories=order, ordered=True)
+        return df.sort_values('Bulan')
+    return pd.DataFrame()
 
 try:
     df = load_data()
-    col1, col2 = st.columns([2.5, 1])
+    if not df.empty:
+        col1, col2 = st.columns([2.5, 1.5]) # Lebar kolom diatur ulang agar grafik stok tidak sempit
 
-    with col1:
-        st.subheader("📊 Analisis Oseanografi")
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
-        fig.add_trace(go.Scatter(x=df["Bulan"], y=df["Suhu_Laut_C"], name="Suhu (°C)", line=dict(color="#FF4136", width=3)), secondary_y=False)
-        fig.add_trace(go.Scatter(x=df["Bulan"], y=df["Klorofil_a"], name="Klorofil", line=dict(color="#2ECC40", width=3, dash="dot")), secondary_y=True)
-        fig.update_layout(template=None, height=400, margin=dict(l=20, r=20, t=30, b=20), legend=dict(orientation="h"))
-        st.plotly_chart(fig, use_container_width=True)
+        with col1:
+            st.subheader("📊 Analisis Oseanografi")
+            fig = make_subplots(specs=[[{"secondary_y": True}]])
+            fig.add_trace(go.Scatter(x=df["Bulan"], y=df["Suhu_Laut_C"], name="Suhu (°C)", line=dict(color="#FF4136", width=3)), secondary_y=False)
+            fig.add_trace(go.Scatter(x=df["Bulan"], y=df["Klorofil_a"], name="Klorofil", line=dict(color="#2ECC40", width=3, dash="dot")), secondary_y=True)
+            fig.update_layout(template=None, height=400, margin=dict(l=40, r=40, t=30, b=50), legend=dict(orientation="h", y=-0.2))
+            st.plotly_chart(fig, use_container_width=True)
 
-    with col2:
-        st.subheader("📈 Estimasi Stok")
-        st.metric("Stok Puncak (Ton)", f"{df['Estimasi_Stok'].max():,.0f}")
-        fig2 = go.Figure(go.Bar(x=df["Bulan"], y=df["Estimasi_Stok"], marker_color="#0077b6"))
-        fig2.update_layout(template=None, height=300, margin=dict(l=20, r=20, t=30, b=20))
-        st.plotly_chart(fig2, use_container_width=True)
+        with col2:
+            st.subheader("📈 Estimasi Stok")
+            st.metric("Stok Puncak (Ton)", f"{df['Estimasi_Stok'].max():,.0f}")
+            fig2 = go.Figure(go.Bar(x=df["Bulan"], y=df["Estimasi_Stok"], marker_color="#0077b6"))
+            # Margin bawah diperbesar (b=60) agar label bulan tidak terpotong
+            fig2.update_layout(template=None, height=300, margin=dict(l=20, r=20, t=20, b=60)) 
+            st.plotly_chart(fig2, use_container_width=True)
 
-    with st.expander("📋 Lihat Detail Data Mentah"):
-        st.dataframe(df, use_container_width=True)
+        with st.expander("📋 Lihat Detail Data Mentah"):
+            st.dataframe(df, use_container_width=True)
+    else:
+        st.warning("Data belum dimuat. Silakan unggah file CSV di sidebar.")
 
 except Exception as e:
-    st.info("Silakan unggah file data di sidebar untuk memulai analisis.")
+    st.error(f"Terjadi kesalahan: {e}")
