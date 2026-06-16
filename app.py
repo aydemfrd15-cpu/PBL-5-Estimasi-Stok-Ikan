@@ -31,6 +31,13 @@ st.markdown("""
         text-align: center;
         border: 1px solid #0077b6;
     }
+    .extra-info-box {
+        background-color: #f0f8ff;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #0077b6;
+        margin-top: 10px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -73,6 +80,16 @@ with st.container():
         st.write("• **Salsa Zahratul Aulia** (10090224004)")
         st.write("• **Aida Farida Kultsum** (10090224014)")
         st.write("• **Nabil Athala Naufal** (10090224022)")
+    with col_kiri:
+        # Menambahkan Info Tambahan sesuai permintaan
+        st.markdown("""
+        <div class="extra-info-box">
+            <b>Informasi Tambahan:</b><br>
+            Analisis ini menggunakan data satelit MODIS untuk mengestimasi potensi perikanan di Laut Jawa. 
+            Data diolah menggunakan Google Earth Engine dengan metode regresi linier sederhana.
+        </div>
+        """, unsafe_allow_html=True)
+        
     with col_kanan:
         st.markdown('<div class="info-card"><b>Mata Kuliah:</b> Ekonomi Sumber Daya Alam dan Lingkungan<br>'
                     '<b>Dosen Pengampu:</b> Yuhka Sundaya, S.E., M.Si.</div>', unsafe_allow_html=True)
