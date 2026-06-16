@@ -34,7 +34,7 @@ with st.container():
     col_logo, col_text = st.columns([1, 6])
     with col_logo:
         try:
-            st.image("Logo Unisba.png", width=120)
+            st.image("Logo Unisbaa.png", width=120)
         except:
             st.warning("Logo tidak ditemukan")
     
