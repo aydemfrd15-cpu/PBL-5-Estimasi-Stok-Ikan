@@ -2,11 +2,12 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import os
 
 # 1. Konfigurasi Halaman
 st.set_page_config(page_title="Estimasi Stok Ikan Laut Jawa", layout="wide")
 
-# 2. CSS untuk Tampilan Profesional
+# 2. CSS Kustom
 st.markdown("""
     <style>
     .main-header { background: linear-gradient(90deg, #001f3f 0%, #0077b6 100%); padding: 25px; border-radius: 10px; color: white; margin-bottom: 20px; }
@@ -29,24 +30,24 @@ with st.container():
 
 st.markdown("---")
 
-# 4. Fungsi Data yang diperbaiki
+# 4. Fungsi Data (DIPERBAIKI)
 @st.cache_data(ttl=60)
 def load_data():
-    # Menyesuaikan dengan path file di GitHub (di dalam folder DATA)
-    file_path = "DATA/Estimasi Stok Ikan Laut Jawa" 
+    # Path file yang tepat
+    file_path = os.path.join("DATA", "Estimasi Stok Ikan Laut Jawa")
     
-    # sep='\s+' menangani pemisah spasi
-    # decimal=',' menangani angka desimal 29,15 menjadi 29.15
+    # Membaca data dengan pemisah spasi dan koma sebagai desimal
     df = pd.read_csv(file_path, sep='\s+', decimal=',')
     
+    # Pengurutan bulan
     order = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"]
     df['Bulan'] = pd.Categorical(df['Bulan'], categories=order, ordered=True)
     return df.sort_values('Bulan')
 
+# 5. Eksekusi Dashboard
 try:
     df = load_data()
 
-    # 5. Dashboard Utama
     col_grafik, col_sidebar = st.columns([2.5, 1])
 
     with col_grafik:
@@ -68,4 +69,4 @@ try:
     st.dataframe(df, use_container_width=True)
 
 except Exception as e:
-    st.error(f"Error memuat data: {e}. Pastikan file ada di folder DATA/ dengan nama yang benar.")
+    st.error(f"Error: {e}. Pastikan file 'Estimasi Stok Ikan Laut Jawa' ada di dalam folder 'DATA'.")
