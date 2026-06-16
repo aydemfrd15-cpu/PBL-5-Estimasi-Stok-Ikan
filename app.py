@@ -59,7 +59,6 @@ with st.container():
 
 st.markdown("---")
 
-# Fungsi load_data yang dipisah agar tidak konflik dengan file uploader
 def get_data(file_obj):
     if file_obj is not None:
         return pd.read_csv(file_obj)
@@ -82,7 +81,6 @@ if not df.empty:
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.add_trace(go.Scatter(x=df["Bulan"], y=df["Suhu_Laut_C"], name="Suhu (°C)", line=dict(color="#FF4136", width=3)), secondary_y=False)
         fig.add_trace(go.Scatter(x=df["Bulan"], y=df["Klorofil_a"], name="Klorofil", line=dict(color="#2ECC40", width=3, dash="dot")), secondary_y=True)
-        # Menambah margin bawah (b=80) agar label tidak terpotong
         fig.update_layout(template=None, height=400, margin=dict(l=40, r=40, t=30, b=80), legend=dict(orientation="h", y=-0.3))
         st.plotly_chart(fig, use_container_width=True)
 
@@ -90,8 +88,8 @@ if not df.empty:
         st.subheader("📈 Estimasi Stok")
         st.metric("Stok Puncak (Ton)", f"{df['Estimasi_Stok'].max():,.0f}")
         fig2 = go.Figure(go.Bar(x=df["Bulan"], y=df["Estimasi_Stok"], marker_color="#0077b6"))
-        # Memberikan ruang yang cukup agar label sumbu X terlihat jelas
-        fig2.update_layout(template=None, height=300, margin=dict(l=20, r=20, t=20, b=80)) 
+        # FIX: l=60 (Margin kiri ditingkatkan agar angka sumbu Y tidak terpotong)
+        fig2.update_layout(template=None, height=300, margin=dict(l=60, r=20, t=20, b=80)) 
         st.plotly_chart(fig2, use_container_width=True)
 
     with st.expander("📋 Lihat Detail Data Mentah"):
