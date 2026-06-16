@@ -9,27 +9,14 @@ st.set_page_config(page_title="Estimasi Stok Ikan Laut Jawa", layout="wide")
 # 2. CSS untuk Tampilan Profesional
 st.markdown("""
     <style>
-    .main-header { 
-        background: linear-gradient(90deg, #001f3f 0%, #0077b6 100%); 
-        padding: 25px; 
-        border-radius: 10px; 
-        color: white; 
-        margin-bottom: 20px; 
-    }
-    .info-card { 
-        background-color: #f0f2f6; 
-        padding: 15px; 
-        border-radius: 10px; 
-        border-left: 5px solid #0077b6; 
-        color: #333; 
-    }
+    .main-header { background: linear-gradient(90deg, #001f3f 0%, #0077b6 100%); padding: 25px; border-radius: 10px; color: white; margin-bottom: 20px; }
+    .info-card { background-color: #f0f2f6; padding: 15px; border-radius: 10px; border-left: 5px solid #0077b6; color: #333; }
     </style>
 """, unsafe_allow_html=True)
 
 # 3. Header Informatif
 with st.container():
     st.markdown('<div class="main-header"><h1>Estimasi Stok Ikan Laut Jawa</h1><h3>PBL 5 — Ekonomi Sumber Daya Ikan</h3></div>', unsafe_allow_html=True)
-    
     col_kiri, col_kanan = st.columns([1, 1])
     with col_kiri:
         st.markdown("### 👥 KELOMPOK 4")
@@ -42,11 +29,16 @@ with st.container():
 
 st.markdown("---")
 
-# 4. Fungsi Data yang Stabil
+# 4. Fungsi Data yang diperbaiki
 @st.cache_data(ttl=60)
 def load_data():
-    df = pd.read_csv("2026-06-16T05-00_export.csv")
-    if 'Unnamed: 0' in df.columns: df = df.drop(columns=['Unnamed: 0'])
+    # Menyesuaikan dengan path file di GitHub (di dalam folder DATA)
+    file_path = "DATA/Estimasi Stok Ikan Laut Jawa" 
+    
+    # sep='\s+' menangani pemisah spasi
+    # decimal=',' menangani angka desimal 29,15 menjadi 29.15
+    df = pd.read_csv(file_path, sep='\s+', decimal=',')
+    
     order = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"]
     df['Bulan'] = pd.Categorical(df['Bulan'], categories=order, ordered=True)
     return df.sort_values('Bulan')
@@ -72,9 +64,8 @@ try:
         fig2.update_layout(template="plotly_white", height=300, margin=dict(l=20, r=20, t=30, b=20))
         st.plotly_chart(fig2, use_container_width=True)
 
-    # 6. Tabel Data
     st.subheader("📋 Detail Data Mentah")
     st.dataframe(df, use_container_width=True)
 
 except Exception as e:
-    st.error(f"Terjadi kesalahan saat memuat data: {e}")
+    st.error(f"Error memuat data: {e}. Pastikan file ada di folder DATA/ dengan nama yang benar.")
