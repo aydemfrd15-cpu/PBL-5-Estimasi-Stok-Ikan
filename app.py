@@ -39,41 +39,43 @@ with st.container():
 
 st.markdown("---")
 
-# Fungsi Data yang diperbaiki (Tanpa index_col=0 untuk menghindari error)
+# Fungsi Data yang sudah diperbaiki
 @st.cache_data(ttl=10)
 def get_data():
-    df = pd.read_csv("2026-06-16T05-00_export.csv")
-    # Hapus kolom pertama jika berisi angka 0-11
-    if df.columns[0] == 'Unnamed: 0' or df.iloc[:, 0].dtype in ['int64', 'int32']:
-        df = df.drop(df.columns[0], axis=1)
-        
-    df.columns = df.columns.str.strip()
+    # Gunakan usecols untuk hanya mengambil kolom yang relevan
+    # Ini akan mengabaikan kolom '0' atau 'Unnamed' yang menyebabkan error
+    df = pd.read_csv("2026-06-16T05-00_export.csv", 
+                     usecols=["Bulan", "Suhu_Laut_C", "Klorofil_a", "Estimasi_Stok"])
     
-    # Urutan bulan
+    # Pastikan data diurutkan berdasarkan kalender
     order = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"]
     df['Bulan'] = pd.Categorical(df['Bulan'], categories=order, ordered=True)
     return df.sort_values('Bulan')
 
 # Load Data
-data = get_data()
+try:
+    data = get_data()
 
-# Dashboard Grafik
-st.subheader("📊 Analisis Oseanografi & Prediksi Biomassa")
-col1, col2 = st.columns(2)
+    # Dashboard Grafik
+    st.subheader("📊 Analisis Oseanografi & Prediksi Biomassa")
+    col1, col2 = st.columns(2)
 
-with col1:
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-    fig.add_trace(go.Scatter(x=data["Bulan"], y=data["Suhu_Laut_C"], name="Suhu (°C)", mode='lines+markers', line=dict(color="red")), secondary_y=False)
-    fig.add_trace(go.Scatter(x=data["Bulan"], y=data["Klorofil_a"], name="Klorofil (mg/m³)", mode='lines+markers', line=dict(color="green", dash="dash")), secondary_y=True)
-    fig.update_layout(template="plotly_dark", height=400)
-    st.plotly_chart(fig, use_container_width=True)
+    with col1:
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig.add_trace(go.Scatter(x=data["Bulan"], y=data["Suhu_Laut_C"], name="Suhu (°C)", mode='lines+markers', line=dict(color="red")), secondary_y=False)
+        fig.add_trace(go.Scatter(x=data["Bulan"], y=data["Klorofil_a"], name="Klorofil (mg/m³)", mode='lines+markers', line=dict(color="green", dash="dash")), secondary_y=True)
+        fig.update_layout(template="plotly_dark", height=400)
+        st.plotly_chart(fig, use_container_width=True)
 
-with col2:
-    fig2 = go.Figure(go.Bar(x=data["Bulan"], y=data["Estimasi_Stok"], marker_color="#4682B4", name="Estimasi Stok"))
-    fig2.add_trace(go.Scatter(x=data["Bulan"], y=data["Estimasi_Stok"], line=dict(color="orange", width=3), name="Tren"))
-    fig2.update_layout(template="plotly_dark", height=400)
-    st.plotly_chart(fig2, use_container_width=True)
+    with col2:
+        fig2 = go.Figure(go.Bar(x=data["Bulan"], y=data["Estimasi_Stok"], marker_color="#4682B4", name="Estimasi Stok"))
+        fig2.add_trace(go.Scatter(x=data["Bulan"], y=data["Estimasi_Stok"], line=dict(color="orange", width=3), name="Tren"))
+        fig2.update_layout(template="plotly_dark", height=400)
+        st.plotly_chart(fig2, use_container_width=True)
 
-# Tabel Data
-st.subheader("📋 Detail Data Mentah")
-st.dataframe(data, use_container_width=True)
+    # Tabel Data
+    st.subheader("📋 Detail Data Mentah")
+    st.dataframe(data, use_container_width=True)
+
+except Exception as e:
+    st.error(f"Terjadi kesalahan saat memuat data: {e}. Pastikan file CSV memiliki kolom: Bulan, Suhu_Laut_C, Klorofil_a, Estimasi_Stok.")
